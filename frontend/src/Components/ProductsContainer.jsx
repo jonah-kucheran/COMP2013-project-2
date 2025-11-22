@@ -1,4 +1,5 @@
 import ProductCard from "./ProductCard";
+import { useEffect } from "react";
 
 export default function ProductsContainer({
   products,
@@ -6,6 +7,7 @@ export default function ProductsContainer({
   handleRemoveQuantity,
   handleAddToCart,
   productQuantity,
+  handleDelete,
 }) {
   return (
     <div className="ProductsContainer">
@@ -17,8 +19,9 @@ export default function ProductsContainer({
           handleRemoveQuantity={handleRemoveQuantity}
           handleAddToCart={handleAddToCart}
           productQuantity={
-            productQuantity.find((p) => p.id === product.id).quantity
+            0
           }
+          handleDelete={handleDelete}
         />
       ))}
     </div>

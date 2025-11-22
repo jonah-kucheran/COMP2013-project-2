@@ -1,13 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import ProductForm from "./ProductForm";
 import CartContainer from "./CartContainer";
 import ProductsContainer from "./ProductsContainer";
 import NavBar from "./NavBar";
 
-export default function GroceriesAppContainer({ products }) {
+export default function GroceriesAppContainer() {
+  const [products, setProducts] = useState([]);
+  const [formData, setFormData] = useState({
+    productName: "",
+    brand: "",
+    image: "",
+    price: ""
+  })
+
+  useEffect(() => {
+    handleProductsDB();
+  }, []);
+
+  const handleProductsDB = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/products");
+      setProducts(response.data);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   const [productQuantity, setProductQuantity] = useState(
     products.map((product) => ({ id: product.id, quantity: 0 }))
   );
-
+  
   const [cartList, setCartList] = useState([]);
 
   const handleAddQuantity = (productId, mode) => {
@@ -82,16 +105,44 @@ export default function GroceriesAppContainer({ products }) {
     setCartList([]);
   };
 
+  const handleOnSubmit = async () => {
+    try {
+      await axios.post("http://localhost:3000/products", formData).then((response) => {
+        console.log(response);
+      });
+    } catch(error) {
+      console.log(error.message);
+    }
+  };
+
+  const handleOnChange = (e) => {
+    setFormData((prevData) => {
+      return {...prevData, [e.target.name]: e.target.value};
+    });
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3000/delete/${id}`).then((response) => {
+        console.log(response)
+      });
+    } catch(error) {
+      console.log(error.message);
+    }
+  }
+
   return (
     <div>
       <NavBar quantity={cartList.length} />
       <div className="GroceriesApp-Container">
+        <ProductForm productName={formData.productName} brand={formData.brand} image={formData.image} price={formData.price} handleOnSubmit={handleOnSubmit} handleOnChange={handleOnChange} />
         <ProductsContainer
           products={products}
           handleAddQuantity={handleAddQuantity}
           handleRemoveQuantity={handleRemoveQuantity}
           handleAddToCart={handleAddToCart}
           productQuantity={productQuantity}
+          handleDelete={handleDelete}
         />
         <CartContainer
           cartList={cartList}
